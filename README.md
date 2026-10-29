@@ -37,3 +37,20 @@ streamlit run app/app.py                   # 3. start the dashboard
 * Model: signal in this synthetic data is moderate (hold-out AUC about 0.67). A shallow, strongly regularised LightGBM is only on par with logistic regression, and both are reported.
 * Ask the Portfolio: the LLM can only learn facts through a SELECT-only SQL tool on an in-memory copy of the data; the answer's numbers are re-checked against the returned rows (a heuristic: it catches invented figures, not a wrongly specified query, which is why the SQL is always shown).
 * Analyst decisions are written to a local CSV; hosted free tiers have ephemeral disks, so production would use a database.
+
+## Reproducible GitHub checkout
+
+The synthetic repayment-history CSV is stored in nine numbered files under
+`data/raw/repayment_parts/` due to upload-size restrictions. On first import
+`src.config` automatically concatenates them in order into
+`data/raw/repayment_history.csv`, so the normal three startup commands work
+unchanged. The assembled file is intentionally Git-ignored.
+
+The model binary, processed Parquet datasets, and the two PDF reports are
+**generated artifacts**, rather than versioned binaries in this repository.
+Run `python -m src.build` to regenerate models and data products, then
+`python -m src.make_docs` to generate the architecture and solution overview
+PDFs. The source datasets, model metrics, and data-quality log are included.
+
+The dataset is synthetic. Never commit a populated `.env` or
+`.streamlit/secrets.toml`.
