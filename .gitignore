@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 data/processed/anomaly_decisions.csv
+data/raw/repayment_history.csv
+data/processed/*.parquet
+models/*.joblib
+docs/*.pdf
