@@ -1,0 +1,522 @@
+{
+  "n_accounts": 14685,
+  "default_rate": 0.161,
+  "n_train": 10276,
+  "n_test": 4409,
+  "feature_sets": {
+    "A. Application only": {
+      "logistic_regression": {
+        "auc": 0.6486,
+        "gini": 0.2972,
+        "ks": 0.2313
+      },
+      "lightgbm": {
+        "auc": 0.6534,
+        "gini": 0.3068,
+        "ks": 0.2362
+      }
+    },
+    "B. + Bureau": {
+      "logistic_regression": {
+        "auc": 0.6574,
+        "gini": 0.3149,
+        "ks": 0.2601
+      },
+      "lightgbm": {
+        "auc": 0.6587,
+        "gini": 0.3174,
+        "ks": 0.255
+      }
+    },
+    "C. + Repayment (full)": {
+      "logistic_regression": {
+        "auc": 0.6705,
+        "gini": 0.341,
+        "ks": 0.2661
+      },
+      "lightgbm": {
+        "auc": 0.6707,
+        "gini": 0.3415,
+        "ks": 0.2569
+      }
+    }
+  },
+  "headline": {
+    "logistic_regression": {
+      "auc": 0.6705,
+      "gini": 0.341,
+      "ks": 0.2661
+    },
+    "lightgbm": {
+      "auc": 0.6707,
+      "gini": 0.3415,
+      "ks": 0.2569
+    }
+  },
+  "out_of_time": {
+    "train_n": 9764,
+    "test_n": 4921,
+    "logistic_regression": {
+      "auc": 0.6849,
+      "gini": 0.3698,
+      "ks": 0.2769
+    },
+    "lightgbm": {
+      "auc": 0.6879,
+      "gini": 0.3757,
+      "ks": 0.2893
+    }
+  },
+  "sensitivity_auc_lightgbm": {
+    "baseline (full feature set)": 0.6707,
+    "+ collections (excluded: post-delinquency, no lift)": 0.6712,
+    "point-in-time bureau only": 0.6649
+  },
+  "oof": {
+    "logistic_regression": {
+      "auc": 0.6718,
+      "gini": 0.3437,
+      "ks": 0.2545
+    },
+    "lightgbm": {
+      "auc": 0.6774,
+      "gini": 0.3548,
+      "ks": 0.262
+    }
+  },
+  "top_features": [
+    {
+      "feature": "log_income",
+      "mean_abs_shap": 0.1653,
+      "share": 0.1739
+    },
+    {
+      "feature": "rep_pct_ontime",
+      "mean_abs_shap": 0.1333,
+      "share": 0.1402
+    },
+    {
+      "feature": "years_employed_imp",
+      "mean_abs_shap": 0.125,
+      "share": 0.1315
+    },
+    {
+      "feature": "bur_mean_dpd",
+      "mean_abs_shap": 0.0928,
+      "share": 0.0976
+    },
+    {
+      "feature": "age",
+      "mean_abs_shap": 0.0782,
+      "share": 0.0823
+    },
+    {
+      "feature": "rep_dpd_mean",
+      "mean_abs_shap": 0.0703,
+      "share": 0.0739
+    },
+    {
+      "feature": "loan_to_income",
+      "mean_abs_shap": 0.0481,
+      "share": 0.0506
+    },
+    {
+      "feature": "bur_max_dpd",
+      "mean_abs_shap": 0.0443,
+      "share": 0.0466
+    },
+    {
+      "feature": "emi_to_income",
+      "mean_abs_shap": 0.0375,
+      "share": 0.0395
+    },
+    {
+      "feature": "rep_dpd_max",
+      "mean_abs_shap": 0.0367,
+      "share": 0.0386
+    },
+    {
+      "feature": "loan_type",
+      "mean_abs_shap": 0.015,
+      "share": 0.0158
+    },
+    {
+      "feature": "years_at_residence_imp",
+      "mean_abs_shap": 0.0148,
+      "share": 0.0156
+    },
+    {
+      "feature": "bur_n_active",
+      "mean_abs_shap": 0.0145,
+      "share": 0.0152
+    },
+    {
+      "feature": "log_loan_amount",
+      "mean_abs_shap": 0.0137,
+      "share": 0.0144
+    },
+    {
+      "feature": "rep_streak_notontime",
+      "mean_abs_shap": 0.007,
+      "share": 0.0074
+    }
+  ],
+  "lr_top_coefficients": [
+    {
+      "feature": "cat__loan_type_Auto Loan",
+      "coef": -0.319
+    },
+    {
+      "feature": "num__log_income",
+      "coef": -0.229
+    },
+    {
+      "feature": "cat__city_tier_Tier 1",
+      "coef": -0.216
+    },
+    {
+      "feature": "num__bur_n_active",
+      "coef": -0.211
+    },
+    {
+      "feature": "cat__disbursal_channel_Branch",
+      "coef": -0.196
+    },
+    {
+      "feature": "cat__city_tier_Tier 2",
+      "coef": -0.182
+    },
+    {
+      "feature": "num__years_employed_imp",
+      "coef": -0.181
+    },
+    {
+      "feature": "cat__region_Central",
+      "coef": -0.177
+    },
+    {
+      "feature": "cat__loan_type_Business Loan",
+      "coef": -0.176
+    },
+    {
+      "feature": "cat__loan_type_Mortgage",
+      "coef": 0.174
+    },
+    {
+      "feature": "cat__housing_type_Mortgaged",
+      "coef": -0.173
+    },
+    {
+      "feature": "cat__employment_type_Business Owner",
+      "coef": -0.172
+    }
+  ],
+  "monitoring_psi_dev_vs_recent": [
+    {
+      "item": "model score (OOF PD)",
+      "psi": 0.0043
+    },
+    {
+      "item": "log_income",
+      "psi": 0.0009
+    },
+    {
+      "item": "age",
+      "psi": 0.0018
+    },
+    {
+      "item": "loan_to_income",
+      "psi": 0.0016
+    },
+    {
+      "item": "bur_max_dpd",
+      "psi": 0.0005
+    },
+    {
+      "item": "rep_dpd_mean",
+      "psi": 0.0064
+    },
+    {
+      "item": "rep_pay_ratio",
+      "psi": 0.0002
+    },
+    {
+      "item": "bur_n_writeoff",
+      "psi": 0.0
+    },
+    {
+      "item": "interest_rate_imp",
+      "psi": 0.0021
+    }
+  ],
+  "calibration_deciles": [
+    {
+      "decile": 1,
+      "n": 1469,
+      "mean_pred": 0.0735,
+      "actual_rate": 0.0633
+    },
+    {
+      "decile": 2,
+      "n": 1468,
+      "mean_pred": 0.0901,
+      "actual_rate": 0.0817
+    },
+    {
+      "decile": 3,
+      "n": 1469,
+      "mean_pred": 0.1029,
+      "actual_rate": 0.0933
+    },
+    {
+      "decile": 4,
+      "n": 1468,
+      "mean_pred": 0.1154,
+      "actual_rate": 0.0988
+    },
+    {
+      "decile": 5,
+      "n": 1469,
+      "mean_pred": 0.1291,
+      "actual_rate": 0.1266
+    },
+    {
+      "decile": 6,
+      "n": 1468,
+      "mean_pred": 0.1454,
+      "actual_rate": 0.1492
+    },
+    {
+      "decile": 7,
+      "n": 1468,
+      "mean_pred": 0.1659,
+      "actual_rate": 0.1832
+    },
+    {
+      "decile": 8,
+      "n": 1469,
+      "mean_pred": 0.1947,
+      "actual_rate": 0.1926
+    },
+    {
+      "decile": 9,
+      "n": 1468,
+      "mean_pred": 0.2388,
+      "actual_rate": 0.2514
+    },
+    {
+      "decile": 10,
+      "n": 1469,
+      "mean_pred": 0.3524,
+      "actual_rate": 0.3696
+    }
+  ],
+  "roc_points": {
+    "fpr": [
+      0.0,
+      0.0028,
+      0.0057,
+      0.0093,
+      0.014,
+      0.0183,
+      0.0217,
+      0.0251,
+      0.0291,
+      0.0341,
+      0.0386,
+      0.0433,
+      0.0479,
+      0.0538,
+      0.0588,
+      0.0628,
+      0.0675,
+      0.0752,
+      0.0805,
+      0.086,
+      0.0912,
+      0.0974,
+      0.1042,
+      0.1096,
+      0.1153,
+      0.12,
+      0.127,
+      0.1317,
+      0.1383,
+      0.1438,
+      0.149,
+      0.1564,
+      0.1629,
+      0.1693,
+      0.1778,
+      0.1851,
+      0.1936,
+      0.1988,
+      0.2062,
+      0.2147,
+      0.2215,
+      0.2293,
+      0.2403,
+      0.2483,
+      0.2555,
+      0.2648,
+      0.2725,
+      0.2775,
+      0.2857,
+      0.2946,
+      0.3042,
+      0.3154,
+      0.3223,
+      0.3298,
+      0.3369,
+      0.347,
+      0.3544,
+      0.3653,
+      0.3733,
+      0.3851,
+      0.3956,
+      0.4058,
+      0.4117,
+      0.4218,
+      0.4349,
+      0.4432,
+      0.4539,
+      0.4657,
+      0.478,
+      0.4863,
+      0.4955,
+      0.5049,
+      0.5191,
+      0.5326,
+      0.5444,
+      0.5597,
+      0.5741,
+      0.5889,
+      0.6,
+      0.6162,
+      0.6366,
+      0.6518,
+      0.6643,
+      0.6762,
+      0.6912,
+      0.7016,
+      0.713,
+      0.7341,
+      0.7473,
+      0.7641,
+      0.7861,
+      0.8029,
+      0.8242,
+      0.8371,
+      0.8538,
+      0.873,
+      0.8955,
+      0.914,
+      0.9422,
+      0.9705,
+      0.9923
+    ],
+    "tpr": [
+      0.0,
+      0.019,
+      0.0398,
+      0.0533,
+      0.0685,
+      0.0829,
+      0.0981,
+      0.1096,
+      0.1206,
+      0.1345,
+      0.1468,
+      0.1561,
+      0.1679,
+      0.1819,
+      0.1954,
+      0.2073,
+      0.2183,
+      0.2297,
+      0.2386,
+      0.2492,
+      0.2606,
+      0.2703,
+      0.283,
+      0.2923,
+      0.3016,
+      0.3147,
+      0.3245,
+      0.3342,
+      0.3431,
+      0.3532,
+      0.3655,
+      0.3735,
+      0.3828,
+      0.3921,
+      0.4019,
+      0.4116,
+      0.4217,
+      0.4315,
+      0.4429,
+      0.4509,
+      0.4615,
+      0.4712,
+      0.4805,
+      0.4898,
+      0.4992,
+      0.5097,
+      0.5195,
+      0.5296,
+      0.5406,
+      0.5503,
+      0.5601,
+      0.569,
+      0.5778,
+      0.5863,
+      0.5952,
+      0.6032,
+      0.6138,
+      0.6244,
+      0.6337,
+      0.6417,
+      0.6506,
+      0.6586,
+      0.6684,
+      0.6785,
+      0.687,
+      0.6971,
+      0.7056,
+      0.7162,
+      0.7263,
+      0.7377,
+      0.7458,
+      0.7542,
+      0.7627,
+      0.772,
+      0.78,
+      0.7885,
+      0.7957,
+      0.805,
+      0.8135,
+      0.8219,
+      0.8308,
+      0.8384,
+      0.8477,
+      0.8558,
+      0.8634,
+      0.8718,
+      0.8799,
+      0.8879,
+      0.8959,
+      0.9057,
+      0.9141,
+      0.923,
+      0.9306,
+      0.9387,
+      0.9475,
+      0.9556,
+      0.9636,
+      0.9717,
+      0.9801,
+      0.9882,
+      0.9962
+    ]
+  }
+}
