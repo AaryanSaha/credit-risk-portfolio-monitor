@@ -1,0 +1,21 @@
+table,issue,rows_affected,decision
+customers,Inconsistent gender coding ('M'/'F' vs 'Male'/'Female'),600,Standardised to Male/Female. Gender is kept for profiling only and excluded from the model.
+customers,Missing years_employed,500,Rows kept; missing-indicator added; value imputed with median by employment_type (model) / left NaN (profiling).
+customers,Missing num_dependents,500,Rows kept; missing-indicator added; value imputed with median by employment_type (model) / left NaN (profiling).
+customers,Missing years_at_residence,500,Rows kept; missing-indicator added; value imputed with median by employment_type (model) / left NaN (profiling).
+customers,years_employed exceeds (age - 16): implausible,726,Capped at age - 16 and flagged.
+customers,"Income floored at 12,000 (piled-up minimum value)",76,Kept as-is (likely a reporting floor); income is log-transformed in the model.
+loan_accounts,Accounts whose customer_id is not in customers,0,None found; join is lossless.
+loan_accounts,Missing interest_rate_pct,294,Imputed with median of the loan_type; indicator kept. Rate is not used to define the target.
+loan_accounts,Channel label 'Partner/DSA' differs from dictionary ('Partner-DSA'),3680,Kept the data's spelling ('Partner/DSA').
+bureau_credit,Written-Off lines carry a date_closed (and no 'Closed' lines are missing it),3530,Treated date_closed on write-offs as the write-off date; status field is the source of truth.
+bureau_credit,Missing days_past_due,689,Not imputed to 0 (would hide risk). Aggregates use skipna; count of unknown lines kept as a feature.
+bureau_credit,Outstanding > sanctioned,0,None found.
+repayment_history,"Duplicate (account_id, payment_month) rows",0,None found.
+repayment_history,Accounts without exactly 12 monthly rows,0,"None: every account has 12 months regardless of tenure, so history is a fixed 12-month observation window."
+repayment_history,"payment_month is an index since origination, not a calendar month",176220,Features are computed on the index; no calendar join made. Calendar trends use origination_date only.
+collections_events,Event dated before the account's origination date,3875,"Dates are not reliable for sequencing. Collections used only as counts/severity for reporting, never for timing."
+collections_events,Collections activity is a consequence of delinquency/default,8635,EXCLUDED from model features to prevent leakage; used on the dashboard and for monitoring only.
+loan_accounts,origination_date earlier than customer_since,7293,Flagged only. 'customer tenure' not used as a feature (it would be negative for these rows).
+bureau_credit,Customers with no external bureau lines (thin file),1008,"Kept; bur_* counts set to 0, ratios left NaN, bur_thin_file=1."
+bureau_credit,Bureau lines opened AFTER the customer's first loan origination (not point-in-time),15523,Bureau treated as a current snapshot (as the data dictionary implies). Sensitivity check in model.py re-scores using only lines opened before origination. Production must use as-of-origination bureau pulls.
