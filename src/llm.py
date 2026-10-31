@@ -94,23 +94,42 @@ _FORBIDDEN = re.compile(r"\b(insert|update|delete|drop|alter|create|attach|detac
 
 
 def safe_sql(con: sqlite3.Connection, sql: str) -> pd.DataFrame:
+    """Execute bounded, read-only SQL with a database-level authorizer."""
+    if not isinstance(sql, str) or len(sql) > 8000:
+        raise SQLRejected("SQL is invalid or too large.")
     s = sql.strip().rstrip(";").strip()
-    if ";" in s:
-        raise SQLRejected("Only a single statement is allowed.")
-    if not re.match(r"^(select|with)\b", s, re.I):
-        raise SQLRejected("Only SELECT queries are allowed.")
+    if ";" in s or not re.match(r"^(select|with)\\b", s, re.I):
+        raise SQLRejected("Only one SELECT is allowed.")
     if _FORBIDDEN.search(s):
         raise SQLRejected("Query contains a forbidden keyword.")
-    t0 = time.time()
-    con.set_progress_handler(lambda: 1 if time.time() - t0 > SQL_TIMEOUT_S else 0, 10_000)
+
+    allowed_tables = {"portfolio", "model_metrics"}
+    allowed_functions = {"count", "sum", "avg", "min", "max", "round",
+                         "abs", "coalesce", "nullif", "lower", "upper",
+                         "length", "substr", "total", "ifnull", "date", "strftime"}
+    def authorize(action, arg1, arg2, dbname, source):
+        if action == sqlite3.SQLITE_SELECT:
+            return sqlite3.SQLITE_OK
+        if action == sqlite3.SQLITE_READ and arg1 in allowed_tables:
+            return sqlite3.SQLITE_OK
+        if action == sqlite3.SQLITE_FUNCTION and str(arg2).lower() in allowed_functions:
+            return sqlite3.SQLITE_OK
+        return sqlite3.SQLITE_DENY
+
+    deadline = time.monotonic() + SQL_TIMEOUT_S
+    con.set_authorizer(authorize)
+    con.set_progress_handler(lambda: int(time.monotonic() >= deadline), 1000)
     try:
         cur = con.execute(s)
-        rows = cur.fetchmany(MAX_ROWS)
         cols = [c[0] for c in cur.description]
+        if len(cols) > 30:
+            raise SQLRejected("Too many columns.")
+        rows = cur.fetchmany(MAX_ROWS)
     except sqlite3.Error as e:
-        raise SQLRejected(f"SQL error: {e}") from e
+        raise SQLRejected("SQL rejected or query limit exceeded.") from e
     finally:
         con.set_progress_handler(None, 0)
+        con.set_authorizer(None)
     return pd.DataFrame(rows, columns=cols)
 
 
@@ -206,10 +225,13 @@ def _parse_final(text: str) -> tuple[str, str]:
     if m:
         try:
             j = json.loads(m.group(0))
-            return j.get("status", "answered"), str(j.get("answer", "")).strip()
+            status = j.get("status")
+            if status not in ("answered", "declined"):
+                return "declined", "The assistant returned an invalid answer status."
+            return status, str(j.get("answer", ""))[:2000].strip()
         except json.JSONDecodeError:
             pass
-    return "answered", text.strip()
+    return "declined", "The assistant did not return valid structured JSON."
 
 
 def ask_llm(question: str, con: sqlite3.Connection, client: Any = None, api_key: str | None = None) -> Answer:
@@ -226,7 +248,7 @@ def ask_llm(question: str, con: sqlite3.Connection, client: Any = None, api_key:
             for block in resp.content:
                 if getattr(block, "type", "") != "tool_use":
                     continue
-                sql = block.input.get("sql", "")
+                sql = block.input.get("sql", "") if isinstance(block.input, dict) else ""
                 try:
                     df = safe_sql(con, sql)
                     evidence.append({"sql": sql, "rows": df})
@@ -241,6 +263,8 @@ def ask_llm(question: str, con: sqlite3.Connection, client: Any = None, api_key:
         if status == "answered" and not evidence:
             return Answer("declined", "I can only answer from the portfolio data and could not run a query for that question.", [], [], "llm")
         bad = verify_numbers(ans, [e["rows"] for e in evidence]) if status == "answered" else []
+        if bad:
+            return Answer("declined", "The generated answer contained unsupported figures.", evidence, bad, "llm")
         return Answer(status, ans, evidence, bad, "llm")
     return Answer("error", "The assistant could not finish within the allowed number of queries. Try a narrower question.", evidence, [], "llm")
 

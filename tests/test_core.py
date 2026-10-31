@@ -79,7 +79,7 @@ def test_llm_tool_loop_grounded(con):
 def test_llm_hallucinated_number_is_flagged(con):
     a = ask("Which loan type has the highest default rate?", con,
             client=_fake_client('{"status":"answered","answer":"Mortgage has the highest default rate at 41.9% (1,432 accounts)."}'))
-    assert a.unverified == ["41.9%"]
+    assert a.status == "declined" and a.unverified == ["41.9%"]
 
 
 def test_llm_answer_without_query_is_refused(con):
@@ -88,3 +88,23 @@ def test_llm_answer_without_query_is_refused(con):
             return NS(stop_reason="end_turn", content=[NS(type="text", text='{"status":"answered","answer":"It is 20%."}')])
     a = ask("what is the default rate", con, client=NS(messages=M()))
     assert a.status == "declined"
+@pytest.mark.parametrize("sql", [
+    "SELECT name FROM sqlite_master",
+    "SELECT load_extension('malicious')",
+    "SELECT randomblob(1000000000)",
+    "SELECT * FROM pragma_database_list",
+])
+def test_sql_authorizer_rejects_unsafe_queries(con, sql):
+    with pytest.raises(SQLRejected):
+        safe_sql(con, sql)
+
+
+def test_sql_authorizer_allows_aggregation(con):
+    assert len(safe_sql(con, "SELECT loan_type, COUNT(*) n FROM portfolio GROUP BY loan_type")) > 0
+
+
+def test_invalid_llm_json_is_declined(con):
+    class M:
+        def create(self, **kw):
+            return NS(stop_reason="end_turn", content=[NS(type="text", text="not JSON")])
+    assert ask("default rate?", con, client=NS(messages=M())).status == "declined"

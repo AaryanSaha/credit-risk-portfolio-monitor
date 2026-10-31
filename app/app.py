@@ -268,7 +268,7 @@ with tab_anom:
         pr_ = df_all[df_all.account_id == pick].iloc[0]
         st.markdown("**Why it was flagged**")
         for rs in pr_.anomaly_reasons.split(" || "):
-            st.markdown(f"- {rs}")
+            st.write("-", rs)
         rep, _, _ = load_account_detail(pick, pr_.customer_id)
         fig = go.Figure(go.Bar(x=rep.payment_month, y=rep.days_past_due, marker_color=[ORANGE if m >= 10 else GREY for m in rep.payment_month], marker_cornerradius=3,
                                hovertemplate="Month %{x}<br>DPD %{y}<extra></extra>"))
@@ -277,13 +277,28 @@ with tab_anom:
         prev = last_dec.loc[pick] if pick in last_dec.index else None
         if prev is not None:
             st.info(f"Last decision: {prev.decision} by {prev.reviewer} at {prev.decided_at}. Note: {prev.note if isinstance(prev.note, str) else '-'}")
+        # Displaying a reviewer name does not authenticate the reviewer.
+        import hmac
+        import os
+        try:
+            review_token = st.secrets.get("REVIEW_WRITE_TOKEN", "")
+        except Exception:
+            review_token = os.environ.get("REVIEW_WRITE_TOKEN", "")
+        supplied_token = st.text_input("Review authorization token", type="password", key="review_auth") if review_token else ""
+        can_review = bool(review_token) and hmac.compare_digest(str(supplied_token), str(review_token))
+        if not review_token:
+            st.info("Decision submissions are disabled until REVIEW_WRITE_TOKEN is configured.")
+        elif not can_review:
+            st.info("Enter the review token before submitting a decision.")
         with st.form("decision", clear_on_submit=True):
             reviewer = st.text_input("Reviewer name", value="analyst")
             note = st.text_input("Note (optional)")
             b1, b2 = st.columns(2)
             ok = b1.form_submit_button("Confirm - needs follow-up", type="primary")
             no = b2.form_submit_button("Dismiss - benign / explained")
-            if ok or no:
+            if (ok or no) and not can_review:
+                st.error("Review authorization is required.")
+            elif ok or no:
                 rec = pd.DataFrame([{"account_id": pick, "decision": "Confirmed" if ok else "Dismissed", "note": note, "reviewer": reviewer or "analyst",
                                      "decided_at": datetime.now().isoformat(timespec="seconds")}])
                 DECISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -329,13 +344,13 @@ with tab_ask:
             st.session_state.qa_history.insert(0, (q, llm.ask(q, con)))
     for qq, a in st.session_state.qa_history[:5]:
         with st.container(border=True):
-            st.markdown(f"**Q: {qq}**")
+            st.write("Q:", qq)
             if a.status == "declined":
                 st.info(f"Declined: {a.text}")
             elif a.status == "error":
                 st.error(a.text)
             else:
-                st.markdown(a.text)
+                st.write(a.text)
                 if a.unverified:
                     st.warning("These figures could not be traced to the query results: " + ", ".join(a.unverified) + ". Do not rely on them.")
                 else:
